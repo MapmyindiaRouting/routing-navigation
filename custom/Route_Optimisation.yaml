@@ -1,0 +1,744 @@
+openapi: 3.0.1
+info:
+  title: Route Optimization
+  description: >-
+    <p> Route Optimization is the process of determining the most cost-efficient route. It needs to include all relevant factors such as the number and location of all the required stops on the route.
+        In other words, this API will solve the Traveling Salesman Problem of routing and the returned path does not have to be the fastest path. As TSP is NP-hard it only returns an approximation.</p> 
+
+      An image:
+        ![MapmyIndia logo](https://en.wikipedia.org/wiki/MapmyIndia/media/File:MapmyIndia.jpg)
+
+    <h2>Important notes</h2><ul>  <li>URLs: the urls to use for UAT and
+    Production are: <ul><li> **UAT**:
+    <code>*https://am.mapmyindia.in*</code><li>  **Production**:
+    <code>*https://apis.mapmyindia.com*</code></li> <li> **Authentication**:    
+    <ul>      <li>To call our API, authorization is required through an access
+    token provided in request header <code>Authorization</code>. For example
+    <code>Authorization: 'bearer your_access_token'</code> </li>      <li>For us
+    to call the API, if your endpoint requires API key authorization, then the
+    API key is provided in request header <code>api-key</code>. For example
+    <code>api-key: 'abc123'</code> </li>    </ul>  </li>  <li>For any issues or
+    questions please submit it to the support : <a
+    href="mailto:apisupport@mapmyindia.com" target="_blank">API Support</a>, if
+    you haven't got access to the support portal contact your service account
+    manager with any questions</li></ul>
+
+    Example request:<br><code>curl -X GET \
+
+    *https://apis.mapmyindia.com/advancedmaps/v1/<lic_key>/route_adv/driving/* \
+
+    -H 'Authorization: bearer xxxx-xxxxxx-xxxxxx-xxxxxx-xxxxxx' \
+
+    -H 'Content-Type: application/json' \</code><p></p>
+  contact:
+    name: MapmyIndia API Support
+    url: 'https://www.mapmyindia.com/api/#f_cont'
+    email: apisupport@mapmyindia.com
+  termsOfService: 'https://www.mapmyindia.com/api/terms-&-conditions'
+  version: V1.0.0
+  license:
+    name: Revised BSD-3 Clause
+    url: >-
+      https://github.com/MapmyIndia/mapmyindia-geoanalytics-api-web/blob/master/LICENSE/master/LICENSE
+tags:
+  - name: RouteOptimization
+    description: >-
+paths:
+  '/advancedmaps/v1/{license_key}/trip_optimization/{profile}/{coordinates}':
+    get:
+      tags:
+        - RouteOptimization
+      summary: Route Optimization service.
+      description: >-
+       ' Route Optimization is the process of determining the most cost-efficient route. It needs to include all relevant factors such as the number and location of all the required stops on the route.
+        In other words, this API will solve the Traveling Salesman Problem of routing and the returned path does not have to be the fastest path. As TSP is NP-hard it only returns an approximation. <li> Currently, not all combinations of roundtrip, source and destination are supported. Right now, the following combinations are possible:'
+
+        | **roundtrip**   | **source**  | **destination** | **supported** |
+        | ------- | -------- | -------- | -------- |
+        | true | first | last | yes |
+        | true | first | any | yes |
+        | true | any | last | yes |
+        | true | any | any | yes |        
+        | false | first | last | yes |                
+        | false | first | any | no |        
+        | false | any | last | no |          
+        | false | any | any | no |         
+        
+      operationId: gettrip_optimizationUsingGET
+      parameters:
+        - $ref: '#/components/parameters/profile'
+        - $ref: '#/components/parameters/license_key'        
+        - $ref: '#/components/parameters/coordinates'
+        - $ref: '#/components/parameters/sources'
+        - $ref: '#/components/parameters/destinations'
+        - $ref: '#/components/parameters/roundtrip'
+        - $ref: '#/components/parameters/steps'
+        - $ref: '#/components/parameters/annotations'
+        - $ref: '#/components/parameters/geometries'   
+        - $ref: '#/components/parameters/overview'        
+        
+      responses:
+        '200':
+          description: OK / NoTrips / NotImplemented
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tripoptimisation'
+        '400':
+          description: 'Bad Request, User made an error while creating a valid request.'
+        '401':
+          description: 'Unauthorized, Developer’s key is not allowed to send a request'
+        '403':
+          description: >-
+            Forbidden, Developer’s key has hit its daily/hourly limit or IP or
+            domain not white-listed.
+        '404':
+          description: HTTP not found
+        '412':
+          description: 'Precondition Failed, i.e. Mandatory parameter is missing'
+        '500':
+          description: 'Internal Server Error, the request caused an error in our systems.'
+        '503':
+          description: >-
+            Service Unavailable, during our maintenance break or server
+            down-times.
+      deprecated: false
+    servers:
+      - url: 'https://am.mapmyindia.in'
+        description: MapmyIndia UAT Server for Development & Evaluation
+      - url: 'https://apis.mapmyindia.com'
+        description: MapmyIndia Production Server
+components:
+  parameters:
+    license_key:
+      name: license_key
+      in: path
+      description: REST API Key for your project.
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: string
+        example: asg52632bbb127890
+    profile:
+      name: profile
+      in: path
+      description: profile for routing engine.
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: string
+        example: driving
+    coordinates:
+      name: coordinates
+      in: path
+      description: >-
+        The first pair of longitude & latitude (comma separated)  is taken as
+        the source and rest of the coordinate pairs as destination (s) whose
+        distance & duration from source will be calculated
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: string
+        example: '77.8276812,28.9183792;78.9398237,27.9827493'
+    point:
+      name: point
+      in: query
+      description: >-
+        The pair of longitude and latitude (comma separated) is taken as the
+        single {longitude},{latitude} entry.
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: string
+        example: '77.8276812,28.9183792;78.9398237,27.9827493'
+    rtype:
+      name: rtype
+      in: query
+      description: >-
+        rtype type of route (integer) required for navigation, where values mean
+        </code></li>  <li> 0 optimal </code></li>  <li> 1 shortest (it will
+        calculate route by excluding access penalties like private roads, etc.)
+      schema:
+        type: integer
+        format: int16
+        default: 0
+        enum:
+          - 0
+          - 1
+    roundtrip:
+      name: roundtrip
+      in: query
+      description: >-
+        Returned route is a roundtrip (route returns to first location)
+      schema:
+        type: boolean
+        default: true
+        enum:
+          - true
+          - false          
+    sources:
+      name: sources
+      in: query
+      description: Use location with given index(0;1 --etc) as source.
+      allowEmptyValue: true
+      required: false
+      schema:
+        type: number
+        example: '{index};{index}[;{index} ...]'
+        enum:
+          - 0
+          - 1
+          - 0;1
+          - 1;2
+          - 0;3
+          - all
+    destinations:
+      name: destinations
+      in: query
+      description: Use location with given index(0;1 --etc) as destination.
+      allowEmptyValue: true
+      required: false
+      schema:
+        type: number
+        example: '{index};{index}[;{index} ...]'
+        enum:
+          - 0
+          - 1
+          - 0;1
+          - 1;2
+          - 0;3
+          - all
+    deviceId:
+      name: deviceId
+      in: query
+      description: >-
+        unique device identifier; datatypestring. apperently Implicitly
+        mandatory for Navigation sharing and session management
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: string
+        default: 1234
+    geometries:
+      name: geometries
+      in: query
+      description: >-
+        This parameter used to change the route geometry format/density
+        (influences overview and per step).Default value is: <li> (polyline)
+        with 5 digit precision; <li> polyline6 for 6digit precision; <li>
+        geojson for geometries as geojson.
+      schema:
+        type: object
+        default: polyline
+        example:
+          - geometry
+          - - 'ie`iByrp}MN{HKeMXmOKuGa@gIiAqFeCyHmBuDsBmB_CuAuGeBeP{D'
+    steps:
+      name: steps
+      in: query
+      description: >-
+        Return route steps for each route leg with intersections, classes,
+        bearing, manuevre etc. Possible values are true/false.
+      schema:
+        type: string
+        default: true
+        enum:
+          - true
+          - false
+    alternatives:
+      name: alternatives
+      in: query
+      description: >-
+        Search for alternative routes. Passing a number e.g. alternatives=3
+        (max) searches for up to 3 (if available) alternative routes. Please
+        note that even if alternative routes are requested, a result cannot be
+        guaranteed.
+      schema:
+        type: string
+        default: true
+        enum:
+          - true
+          - 0
+          - 1
+          - 2
+          - 3
+    isSort:
+      name: isSort
+      in: query
+      description: To get route index duration in an ascending order.
+      schema:
+        type: boolean
+        default: false
+        enum:
+          - false
+          - true
+    routeRefresh:
+      name: routeRefresh
+      in: query
+      description: >-
+        TRUE, if route is a candid for eta_refresh or safety      events, a
+        unique identifier for route will be served as part of response
+      schema:
+        type: boolean
+        default: false
+        enum:
+          - true
+          - false
+    sessionId:
+      name: sessionId
+      in: query
+      description: >-
+        Unique identifier for navigation session, will be given if re-route
+        calculation is requested for same destination or choose alternative via
+        route for same destination. Implicitly mandatory for Navigation sharing
+        and session management
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: string
+        default: false
+        example: 345678ggt23909765jg/2
+    radiuses:
+      name: radiuses
+      in: query
+      description: >-
+        Limits the search to given radius in meters. For all way-points
+        including start and end points and the value format is number >= 0 or
+        unlimited (default).  {radius};{radius}[;{radius} ...]. (shall be part
+        of premium offering).
+      schema:
+        type: number
+        default: 0
+        example: 10;10
+    overview:
+      name: overview
+      in: query
+      description: >-
+        Add overview geometry either full, simplified according to highest zoom
+        level it could be display on, or not at all. Possible values could be
+        simplified (default), full, false. (shall be part of premium offering)
+      schema:
+        type: string
+        default: full
+        enum:
+          - simplified
+          - full
+          - false
+    exclude:
+      name: exclude
+      in: query
+      description: >-
+        Additive list of road classes to avoid, order does not matter. Possible
+        values are toll, motorway & ferry and exclude 3 value together too.
+      schema:
+        type: string
+        default: null
+        enum:
+          - toll
+          - motorway
+          - ferry
+          - 'toll, motorway'
+          - 'toll, motorway, ferry'
+          - null
+      allowEmptyValue: false
+    bearings:
+      name: bearings
+      in: query
+      description: >-
+        Limits the search to segments with given bearing in degrees. The
+        referencing will be to the true north and in clockwise direction. A
+        combination of bearing and range e.g. {value},{range} integer 0 ..
+        360,integer 0 .. 180. Please note The number of elements must match
+        exactly the number of locations. You can also pass an empty value in
+        case you dont want to add specific values. (shall be part of premium/
+        navigation offering).
+      schema:
+        type: string
+        default: '0'
+    routeId:
+      name: routeId
+      in: query
+      description: >-
+        RouteId represents one leg object of route. Although routeId is optional
+        for sharetrip functionality
+      schema:
+        type: string
+      required: true
+      allowEmptyValue: false
+      example: 65626hy2992hih09782/2
+    annotations:
+      name: annotations
+      in: query
+      description: >-
+        Returns additional metadata for each coordinate along the    route
+        geometry (shall be part of internal use case only).       Applicable for
+        traffic enabled APIs, possible values are <li> **nodes** - node ID for
+        each coordinate along the route, excluding the first/last user-supplied
+        coordinates  <li> **distance** - distance (in metres), duration in
+        traffic (du_act) and for optimal (du_opt)  between each pair of
+        coordinates  <li> **duration** - duration between each pair of
+        coordinates, in seconds. Does not include the duration of any turns. 
+        <li> **speed** -  Convenience field, calculation of distance / duration
+        rounded to one decimal place <li> **baseDuration** - To get optimal
+        (Without Traffic) duration of route. <li> **congestion** - congestion
+        between each pair of coordinates. for eg. unknown, heavy, moderate, low
+        & severe.
+      schema:
+        type: string
+        default: null
+        enum:
+          - nodes
+          - distance
+          - duration
+          - speed
+          - congestion
+          - baseDuration
+          - true
+          -  null
+    region:
+      name: region
+      in: query
+      description: >-
+        This parameter is optional for India; for other countries (Sri Lanka,
+        Nepal, Bangladesh & Bhutan) this parameter is mandatory. Possible values
+        are ind (for India, default), lka (for Sri Lanka) , npl (for Nepal) ,
+        bgd (for Bangladesh), mmr (for Myanmar) and btn (for Bhutan).
+      schema:
+        type: string
+        example: lka - Srilanka
+        default: ind
+        enum:
+          - ind
+          - lka
+          - npl
+          - bgd
+          - btn
+          - mmr
+  schemas:
+    tripoptimisation:
+      title: tripoptimisation
+      type: object
+      properties:
+        Code:
+          type: integer
+          description: See the service dependent and general status codes
+          format: int16
+          example: ok
+        waypoints:
+          type: object
+          $ref: '#/components/schemas/tripwaypoints'
+        trips:
+          type: object
+          $ref: '#/components/schemas/trips'
+    trips:
+      title: trips
+      type: object
+      properties:
+        legs:
+          type: object
+          $ref: '#/components/schemas/triplegs'
+        weight_name:
+          type: string
+          description: See the service dependent and general status codes
+          format: int16
+          example: routability
+        geometry:
+          type: object
+          description: >-
+            The un-simplified geometry of the route segment, depends on the
+            given geometries parameter.
+          example: '}glmDqhzvM|@pBf@`A'
+        weight:
+          type: string
+          description: See the service dependent and general status codes
+          format: int16
+          example: 657.3   
+        distances:
+          type: number
+          description: >-
+            Duration in seconds for source to source (default 0), 1st, 2nd, 3rd
+            secondary locations from source
+          example: 7112
+        durations:
+          type: number
+          description: >-
+            Distance in meters for source to source (default 0), 1st, 2nd, 3rd
+            secondary locations from source
+          example: 657.3
+    tripwaypoints:
+      title: tripwaypoints
+      description: An array of Route objects that assemble the trace.
+      type: object
+      properties:
+        waypoint_index:
+          type: object
+          format: number
+          description:  Index of the point in the trip.
+          example: 0      
+        trip_index:
+          type: object
+          format: number
+          description: Index to trips of the sub-trip the point was matched to.
+          example: 0
+        hint:
+          type: string
+          description: >-
+            Unique internal identifier of the segment (ephemeral, not constant
+            over data updates) This can be used on subsequent request to
+            significantly speed up the query and to connect multiple services.
+            E.g. you can use the hint value obtained by the nearest query as
+            hint values for route inputs
+          example: >-
+            jswggP___38pAAAAQAAAAAAAAAAAAAAACi-sQankP0EAAAAAAAAAACkAAABAAAAAAAAAAAAAAADBAAAAif6aBCX2swGc_poELfazAQAAvwm4LMFh
+        distance:
+          type: number
+          description: Distance in meters to the supplied input coordinate.
+          example: 15.014575
+        location:
+          type: object
+          description: >-
+            longitude, latitude pair describing the snapped location of the
+            waypoint
+          example:
+            - 77.308945
+            - 28.575405
+        name:
+          type: string
+          description: Name of the street the coordinate snapped to.
+          example: CV Raman Marg
+    waypoints:
+      title: waypoints
+      description: Array of Waypoint objects representing all waypoints in order
+      type: object
+      properties:
+        hint:
+          type: number
+          description: >-
+            Unique internal identifier of the segment (ephemeral, not constant
+            over data updates) This can be used on subsequent request to
+            significantly speed up the query and to connect multiple services.
+            E.g. you can use the hint value obtained by the nearest query as
+            hint values for route inputs
+          example: >-
+            jswggP___38pAAAAQAAAAAAAAAAAAAAACi-sQankP0EAAAAAAAAAACkAAABAAAAAAAAAAAAAAADBAAAAif6aBCX2swGc_poELfazAQAAvwm4LMFh
+        distance:
+          type: number
+          description: Distance in meters to the supplied input coordinate.
+          example: 15.014575
+        location:
+          type: object
+          description: >-
+            longitude, latitude pair describing the snapped location of the
+            waypoint
+          example:
+            - 77.308945
+            - 28.575405
+        name:
+          type: string
+          description: Name of the street the coordinate snapped to.
+          example: CV Raman Marg
+    intersections:
+      title: intersections
+      type: object
+      description: >-
+        A list of Intersection objects1 that are passed along the segment, the
+        very first belonging to the StepManeuver
+      properties:
+        classes:
+          type: string
+          description: Categorised types of road segments.
+          example: Motorway
+        in:
+          type: integer
+          description: >-
+            Index into bearings/entry array. Used to calculate the bearing just
+            before the turn. Namely, the clockwise angle from true north to the
+            direction of travel immediately before the maneuver/passing the
+            intersection. Bearings are given relative to the intersection. To
+            get the bearing in the direction of driving, the bearing has to be
+            rotated by a value of 180. The value is not supplied for depart
+            maneuvers
+          example: 1
+        out:
+          type: integer
+          description: >-
+            Index into the bearings/entry array. Used to extract the bearing
+            just after the turn. Namely, The clockwise angle from true north to
+            the direction of travel immediately after the maneuver/passing the
+            intersection. The value is not supplied for arrive maneuvers
+          example: 2
+        entry:
+          type: boolean
+          description: >-
+            A list of entry flags, corresponding in a 1:1 relationship to the
+            bearings. A value of true indicates that the respective road could
+            be entered on a valid route. false indicates that the turn onto the
+            respective road would violate a restriction
+          example:
+            - true
+            - false
+            - true
+            - true
+        lane:
+          type: array
+          items:
+            $ref: '#/components/schemas/lane'
+            description: >-
+              Array of Lane objects that denote the available turn lanes at the
+              intersection. If lane information is no available for an
+              intersection, the lanes property will not be present
+        location:
+          type: number
+          description: 'A [longitude, latitude] pair describing the location of the turn.'
+          example:
+            - 77.30882
+            - 28.57386
+        bearing:
+          type: string
+          description: >-
+            A list of bearing values (e.g. [0,90,180,270]) that are available at
+            the intersection. The bearings describe all available roads at the
+            intersection
+          example:
+            - 90
+            - 150
+            - 330
+    lane:
+      title: lane
+      type: object
+      description: >-
+        Array of Lane objects that denote the available turn lanes at the
+        intersection. If no lane information is available for an intersection,
+        the lanes property will not be present
+      properties:
+        valid:
+          type: boolean
+          description: verifying lane info
+          example: true
+        intersections:
+          type: string
+          description: >-
+            Indicating a sign of directions like Straight, Slight Left, Right,
+            etc. To see the complete list of indications
+          example:
+            - straight
+            - slight left
+    tripsteps:
+      title: steps
+      type: object
+      description: Return route steps for each route leg depending upon steps parameter
+      properties:
+        intersections:
+          type: array
+          items: null
+          $ref: '#/components/schemas/intersections'
+          description: >-
+            A list of Intersection objects1 that are passed along the segment,
+            the very first belonging to the StepManeuver
+        driving_side:
+          type: string
+          description: 'Left. (default) for India, Sri Lanka, Nepal, Bangladesh & Bhutan'
+          example: left
+        geometry:
+          type: object
+          description: >-
+            The un-simplified geometry of the route segment, depends on the
+            given geometries parameter.
+          example: '}glmDqhzvM|@pBf@`A'
+        duration:
+          type: number
+          description: 'The estimated travel time, in float number of seconds'
+          example: 64.5
+        distance:
+          type: number
+          description: Distance in meters to the supplied input coordinate.
+          example: 103.8
+        name:
+          type: string
+          description: Name of the street the coordinate snapped to.
+          example: Motilal Marg
+        weight:
+          type: number
+          description: Parameter for internal use only
+          example: 64.5
+        mode:
+          type: string
+          default: driving
+          description: Signifies the mode of transportation.
+          example: driving
+        maneuver:
+          type: array
+          items:
+            $ref: '#/components/schemas/maneuver'
+    maneuver:
+      title: maneuver
+      type: object
+      description: A StepManeuver object representing a maneuver
+      properties:
+        bearing_after:
+          type: number
+          description: >-
+            The clockwise angle from true north to the direction of travel
+            immediately after the maneuver.
+          example: 0
+        bearing_before:
+          type: number
+          description: >-
+            The clockwise angle from true north to the direction of travel
+            immediately before the maneuver.
+          example: 155
+        location:
+          type: number
+          description: 'A [longitude, latitude] pair describing the location of the turn.'
+          example:
+            - 77.26657
+            - 28.571173
+        type:
+          type: string
+          description: >-
+            A string indicating the type of maneuver. New identifiers might be
+            introduced without API change. Types unknown to the client should be
+            handled like the .turn. type, the existence of correct modifier
+            values is guaranteed
+          example: fork
+        modifier:
+          type: string
+          description: >-
+            An optional string indicating the direction change of the maneuver.
+            To see the complete list of modifiers
+          example: left
+    triplegs:
+      title: triplegs
+      type: object
+      description: >-
+        The legs between the given waypoints, representing an array of routes
+        between two waypoints
+      properties:
+        steps:
+          type: array
+          description: Return route steps for each route leg depending upon steps parameter
+          items: null
+          $ref: '#/components/schemas/tripsteps'
+        weight:
+          type: number
+          description: Parameter for internal use only
+          example: 657.3
+        distance:
+          type: number
+          description: 'The distance of travel to the subsequent step, in float meters'
+          example: 7112
+        summary:
+          type: string
+          description: Summary of the route taken as string. Depends on the steps parameter
+        duration:
+          type: number
+          description: 'The estimated travel time, in float number of seconds'
+          example: 657.3
+  securitySchemes:
+    mmi_auth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://outpost.mapmyindia.com/api/security/oauth/token'
+          scopes:
+            READ: read authorization for APIs
