@@ -1,2 +1,1 @@
-# routing-navigation
-Routing and Navigation API Documentation for Direction and Traffic
+# Session APIs Swagger Documentation
